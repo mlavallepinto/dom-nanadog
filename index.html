@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dom en Nanadog 🐶 — 2026</title>
+<style>
+  :root {
+    --dark:#1A1A2E; --med:#16213E; --acc:#E94560;
+    --green:#1D9E75; --amber:#EF9F27; --red:#E24B4A;
+    --bg:#F5F3EF; --card:#FFFFFF; --text:#2D2D2D;
+    --sub:#888; --border:#E8E4DE;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+  .header{background:var(--dark);color:white;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .header h1{font-size:17px;font-weight:600}
+  .header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .ultima{font-size:11px;color:#F5C518}
+
+  .sync-bar{background:var(--med);padding:10px 22px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .sync-label{font-size:11px;color:#aaa;flex:1}
+  .btn-sync{padding:7px 14px;border-radius:8px;border:none;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px}
+  .btn-refresh{background:#1D9E75;color:white}
+  .btn-refresh:hover{opacity:.88}
+  .btn-sheets{background:#4285F4;color:white}
+  .btn-sheets:hover{opacity:.88}
+
+  .main{max-width:900px;margin:0 auto;padding:18px 14px}
+
+  .gauges{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+  .gauge-card{background:var(--card);border-radius:14px;padding:18px 14px 12px;box-shadow:0 1px 4px rgba(0,0,0,.07);display:flex;flex-direction:column;align-items:center;gap:7px;border:1.5px solid var(--border);transition:border-color .3s}
+  .gauge-title{font-size:11px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;text-align:center}
+  .gauge-wrap{position:relative;display:flex;flex-direction:column;align-items:center}
+  .gauge-val{font-size:18px;font-weight:700;line-height:1;margin-top:4px}
+  .gauge-sub{font-size:10px;color:var(--sub);margin-top:2px}
+  .gauge-badge{font-size:11px;font-weight:600;padding:3px 12px;border-radius:20px}
+  .ok{background:#E8F8F3;color:#085041}
+  .warn{background:#FEF9EC;color:#633806}
+  .danger{background:#FEF0F0;color:#791F1F}
+
+  .dom-card{background:var(--card);border-radius:14px;padding:16px 18px;display:flex;gap:16px;align-items:center;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.07);border:1.5px solid var(--border);transition:border-color .4s}
+  .dom-photo{width:90px;height:90px;border-radius:50%;object-fit:cover;object-position:center 15%;border:4px solid var(--green);flex-shrink:0;transition:border-color .4s}
+  .dom-status{font-size:17px;font-weight:600;transition:color .4s}
+  .dom-msg{font-size:12px;color:var(--sub);margin-top:5px;line-height:1.5}
+  .dom-comodines{font-size:12px;margin-top:7px;font-weight:500}
+
+  .reg-card{background:var(--card);border-radius:14px;padding:16px 18px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.07);border:1.5px solid var(--border)}
+  .sec-title{font-size:11px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+  .reg-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+  .reg-field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:110px}
+  .reg-field label{font-size:11px;font-weight:600;color:var(--sub)}
+  .reg-field input,.reg-field select{padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);outline:none}
+  .reg-field input:focus,.reg-field select:focus{border-color:var(--acc)}
+  .btn-add{padding:9px 18px;background:var(--acc);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+  .btn-add:hover{opacity:.88}
+
+  .table-card{background:var(--card);border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.07);border:1.5px solid var(--border);margin-bottom:16px}
+  .table-header{background:var(--dark);color:white;padding:11px 16px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+  table{width:100%;border-collapse:collapse}
+  th{background:var(--med);color:white;font-size:11px;font-weight:600;padding:8px 10px;text-align:center}
+  td{font-size:12px;padding:8px 10px;text-align:center;border-bottom:1px solid var(--border)}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#FAF8F5}
+  .tot-row td{background:var(--dark);color:white;font-weight:700;border:none}
+
+  .log-card{background:var(--card);border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.07);border:1.5px solid var(--border);margin-bottom:16px}
+  .log-header{background:var(--med);color:white;padding:9px 14px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;display:flex;justify-content:space-between;align-items:center}
+  .btn-small{font-size:10px;padding:3px 8px;background:transparent;border:1px solid rgba(255,255,255,.3);color:white;border-radius:4px;cursor:pointer}
+  #log-table th{background:#f0ede8;color:var(--sub);font-size:10px;padding:7px 10px;text-align:center}
+  #log-table td{font-size:11px;padding:7px 10px}
+  .btn-del{background:none;border:none;cursor:pointer;font-size:13px;opacity:.45}
+  .btn-del:hover{opacity:1}
+
+  /* Modal importar */
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center}
+  .modal-bg.show{display:flex}
+  .modal{background:white;border-radius:16px;padding:24px;width:90%;max-width:480px;display:flex;flex-direction:column;gap:14px}
+  .modal h3{font-size:15px;font-weight:600}
+  .modal p{font-size:12px;color:var(--sub);line-height:1.6}
+  .modal textarea{width:100%;height:120px;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-family:monospace;resize:vertical;outline:none}
+  .modal textarea:focus{border-color:var(--acc)}
+  .modal-btns{display:flex;gap:10px;justify-content:flex-end}
+  .btn-cancel{padding:8px 16px;background:#eee;border:none;border-radius:8px;cursor:pointer;font-size:13px}
+  .btn-ok{padding:8px 16px;background:var(--acc);color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--dark);color:white;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;z-index:200}
+  .toast.show{opacity:1}
+
+  @media(max-width:500px){
+    .gauges{grid-template-columns:1fr}
+    .dom-photo{width:70px;height:70px}
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🐶 Dom en Nanadog — 2026</h1>
+  <div class="header-right">
+    <span class="ultima" id="ultima-vis">Sin registros aún</span>
+  </div>
+</div>
+
+<!-- BARRA DE SINCRONIZACIÓN -->
+<div class="sync-bar">
+  <span class="sync-label">☁️ Datos en Google Sheets — <span id="conn-status">⏳ Cargando...</span></span>
+  <button class="btn-sync btn-refresh" onclick="refrescar()">🔄 Actualizar</button>
+  <button class="btn-sync btn-sheets" onclick="window.open('https://docs.google.com/spreadsheets/d/1k16y6Y2QtHcZVhV5xDyx9yB35pNjTkVPh3a9nyH04A0/edit','_blank')">📊 Ver Sheets</button>
+</div>
+
+<div class="main">
+
+  <!-- VELOCÍMETROS -->
+  <div class="gauges">
+    <div class="gauge-card" id="card-mensual">
+      <div class="gauge-title" id="gauge-mes-title">Mayo 2026</div>
+      <div class="gauge-wrap">
+        <canvas id="g-mensual" width="200" height="118"></canvas>
+        <div class="gauge-val" id="gm-val">S/ 0</div>
+        <div class="gauge-sub">de S/ 440</div>
+      </div>
+      <span class="gauge-badge ok" id="gm-badge">0% · sin registros</span>
+    </div>
+    <div class="gauge-card" id="card-anual">
+      <div class="gauge-title">Acumulado 2026</div>
+      <div class="gauge-wrap">
+        <canvas id="g-anual" width="200" height="118"></canvas>
+        <div class="gauge-val" id="ga-val">S/ 2,811</div>
+        <div class="gauge-sub">de S/ 5,280</div>
+      </div>
+      <span class="gauge-badge warn" id="ga-badge">52.3% · atención</span>
+    </div>
+  </div>
+
+  <!-- DOM -->
+  <div class="dom-card" id="dom-card">
+    <img class="dom-photo" id="dom-photo" src="https://mlavallepinto.github.io/dom-nanadog/dom.jpg" alt="Dom" />
+    <div>
+      <div class="dom-status" id="dom-status">Dom está feliz 🐶</div>
+      <div class="dom-msg" id="dom-msg">Registra la primera visita del mes para ver el estado.</div>
+      <div class="dom-comodines" id="dom-comodines"></div>
+    </div>
+  </div>
+
+  <!-- REGISTRAR -->
+  <div class="reg-card">
+    <div class="sec-title">➕ Registrar visita</div>
+    <div class="reg-row">
+      <div class="reg-field">
+        <label>Fecha</label>
+        <input type="date" id="inp-fecha"/>
+      </div>
+      <div class="reg-field">
+        <label>Tipo</label>
+        <select id="inp-tipo">
+          <option value="Guardería">Guardería — S/ 40</option>
+          <option value="Hospedaje">Hospedaje — S/ 50</option>
+          <option value="Pijamada">Pijamada — S/ 25</option>
+        </select>
+      </div>
+      <div class="reg-field" style="max-width:95px">
+        <label>Precio (S/)</label>
+        <input type="number" id="inp-precio" value="40" min="0"/>
+      </div>
+      <button class="btn-add" onclick="agregarVisita()">Agregar</button>
+    </div>
+  </div>
+
+  <!-- TABLA 12 MESES -->
+  <div class="table-card">
+    <div class="table-header">Semáforo mensual — 12 meses</div>
+    <table>
+      <thead><tr><th>Mes</th><th>Gasto</th><th>Ppto</th><th>% Usado</th><th>Margen</th><th>Estado</th></tr></thead>
+      <tbody id="tbody-meses"></tbody>
+      <tfoot><tr class="tot-row" id="tot-row"></tr></tfoot>
+    </table>
+  </div>
+
+  <!-- LOG -->
+  <div class="log-card">
+    <div class="log-header">
+      <span>Visitas registradas</span>
+      <button class="btn-small" onclick="limpiarTodo()">Limpiar todo</button>
+    </div>
+    <table id="log-table">
+      <thead><tr><th>Fecha</th><th>Tipo</th><th>S/</th><th>Mes</th><th></th></tr></thead>
+      <tbody id="log-body"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Sin modal de importar - ahora es todo online via Google Sheets -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIGURACIÓN GOOGLE SHEETS ─────────────────────────────────────────
+const API_URL = 'https://script.google.com/macros/s/AKfycbxFMilyLkb2QH2DtG036lRDrB8ojwZi1r0ZG-WAdmhl9c5b0arHpjNmET38jt4-ouki/exec';
+
+const HIST={Ene:760.7,Feb:700,Mar:700,Abr:600};
+const PRESUP=440, PRESUP_A=5280;
+const MESES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const MESES_N={Ene:'Enero',Feb:'Febrero',Mar:'Marzo',Abr:'Abril',May:'Mayo',
+               Jun:'Junio',Jul:'Julio',Ago:'Agosto',Sep:'Septiembre',
+               Oct:'Octubre',Nov:'Noviembre',Dic:'Diciembre'};
+const MESES_F={May:'Mayo',Jun:'Junio',Jul:'Julio',Ago:'Agosto',
+               Sep:'Septiembre',Oct:'Octubre',Nov:'Noviembre',Dic:'Diciembre'};
+
+let visitas = [];
+let cargando = false;
+
+// ── API GOOGLE SHEETS ───────────────────────────────────────────────────
+function cargarDesdeSheets() {
+  setEstadoConexion('cargando');
+  // Eliminar script JSONP anterior si existe
+  const old = document.getElementById('jsonp-script');
+  if (old) old.remove();
+  
+  // Crear callback global único
+  const cbName = 'jsonpCb_' + Date.now();
+  window[cbName] = function(data) {
+    try {
+      visitas = data.map(r => ({
+        fecha: r.fecha ? r.fecha.toString().split('T')[0] : '',
+        tipo:  r.tipo  || '',
+        precio: Number(r.precio) || 0,
+        mes:   r.mes   || getMes(r.fecha ? r.fecha.toString().split('T')[0] : '')
+      })).filter(r => r.fecha);
+      setEstadoConexion('ok');
+      localStorage.setItem('dom_visitas', JSON.stringify(visitas));
+      render();
+    } catch(e) {
+      setEstadoConexion('error');
+    }
+    delete window[cbName];
+  };
+  
+  // Timeout fallback
+  setTimeout(() => {
+    if (window[cbName]) {
+      delete window[cbName];
+      setEstadoConexion('error');
+      toast('⚠️ Sin conexión — mostrando datos locales', 4000);
+      visitas = JSON.parse(localStorage.getItem('dom_visitas') || '[]');
+      render();
+    }
+  }, 8000);
+  
+  const script = document.createElement('script');
+  script.id = 'jsonp-script';
+  script.src = API_URL + '?callback=' + cbName + '&t=' + Date.now();
+  document.body.appendChild(script);
+}
+
+async function apiPost(payload) {
+  try {
+    await fetch(API_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'text/plain'},
+      body: JSON.stringify(payload)
+    });
+    return {ok: true};
+  } catch(e) {
+    console.log('POST error:', e);
+    return {ok: false};
+  }
+}
+
+function setEstadoConexion(estado) {
+  const el = document.getElementById('conn-status');
+  if (!el) return;
+  if (estado === 'ok')       { el.textContent = '🟢 En línea'; el.style.color = '#1D9E75'; }
+  if (estado === 'cargando') { el.textContent = '⏳ Cargando...'; el.style.color = '#F5C518'; }
+  if (estado === 'error')    { el.textContent = '🔴 Sin conexión'; el.style.color = '#E24B4A'; }
+}
+
+function getMes(f){return MESES[new Date(f+'T12:00:00').getMonth()];}
+function gastoMes(m){return (HIST[m]||0)+visitas.filter(v=>v.mes===m).reduce((s,v)=>s+Number(v.precio),0);}
+function totalA(){return MESES.reduce((s,m)=>s+gastoMes(m),0);}
+function fmt(n){return 'S/ '+n.toLocaleString('es-PE',{minimumFractionDigits:1,maximumFractionDigits:1});}
+function mesHoy(){return MESES[new Date().getMonth()];}
+function color(g,p){if(g===0)return '#BBBBBB';return g>p?'#E24B4A':g>p*0.7273?'#EF9F27':'#1D9E75';}
+
+function toast(msg,ms=2500){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),ms);
+}
+
+// ── VELOCÍMETRO ────────────────────────────────────────────────────────
+function drawGauge(id,gasto,presup){
+  const cv=document.getElementById(id),ctx=cv.getContext('2d');
+  const W=200,H=118,cx=W/2,cy=H-8,r=82;
+  ctx.clearRect(0,0,W,H);
+  const clr=color(gasto,presup);
+  const p=Math.min(gasto/presup,1.05);
+
+  // Track
+  ctx.beginPath();ctx.arc(cx,cy,r,Math.PI,0);
+  ctx.lineWidth=20;ctx.strokeStyle='#E8E4DE';ctx.lineCap='round';ctx.stroke();
+
+  // Zonas fondo
+  [[0,0.7273,'#1D9E7530'],[0.7273,1,'#EF9F2730']].forEach(([a,b,c])=>{
+    ctx.beginPath();ctx.arc(cx,cy,r,Math.PI+Math.PI*a,Math.PI+Math.PI*b);
+    ctx.lineWidth=20;ctx.strokeStyle=c;ctx.lineCap='butt';ctx.stroke();
+  });
+
+  // Relleno gasto
+  if(gasto>0){
+    ctx.beginPath();ctx.arc(cx,cy,r,Math.PI,Math.PI+Math.PI*Math.min(p,1.02));
+    ctx.lineWidth=20;ctx.strokeStyle=clr;ctx.lineCap='round';ctx.stroke();
+  }
+
+  // Marcas límite
+  [0.7273,1].forEach(pp=>{
+    const a=Math.PI+Math.PI*pp;
+    ctx.beginPath();
+    ctx.moveTo(cx+Math.cos(a)*(r-13),cy+Math.sin(a)*(r-13));
+    ctx.lineTo(cx+Math.cos(a)*(r+5),cy+Math.sin(a)*(r+5));
+    ctx.lineWidth=2;ctx.strokeStyle='#C8C4BE';ctx.stroke();
+  });
+
+  // AGUJA
+  const na=Math.PI+Math.PI*Math.min(p,1.02);
+  const nx=cx+Math.cos(na)*(r-6),ny=cy+Math.sin(na)*(r-6);
+  ctx.shadowColor='rgba(0,0,0,.18)';ctx.shadowBlur=5;
+  ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(nx,ny);
+  ctx.lineWidth=3.5;ctx.strokeStyle=clr;ctx.lineCap='round';ctx.stroke();
+  ctx.shadowBlur=0;
+  ctx.beginPath();ctx.arc(cx,cy,8,0,Math.PI*2);ctx.fillStyle=clr;ctx.fill();
+  ctx.beginPath();ctx.arc(cx,cy,3.5,0,Math.PI*2);ctx.fillStyle='white';ctx.fill();
+
+  // Labels
+  ctx.font='10px Arial';ctx.fillStyle='#AAA';ctx.textAlign='center';
+  ctx.fillText('S/0',cx-r+6,cy+17);
+  ctx.fillText('S/'+presup.toLocaleString(),cx+r-4,cy+17);
+  ctx.font='bold 14px Arial';ctx.fillStyle=clr;ctx.textAlign='center';
+  ctx.fillText(Math.round(Math.min(p,1)*100)+'%',cx,cy-38);
+}
+
+// ── DOM ────────────────────────────────────────────────────────────────
+function updateDom(gm){
+  const ph=document.getElementById('dom-photo');
+  const st=document.getElementById('dom-status');
+  const ms=document.getElementById('dom-msg');
+  const cm=document.getElementById('dom-comodines');
+  const cd=document.getElementById('dom-card');
+  const mg=PRESUP-gm;
+  if(gm===0){
+    ph.style.borderColor='#1D9E75';cd.style.borderColor='#E8E4DE';
+    st.style.color='#085041';st.textContent='Dom está feliz 🐶';
+    ms.textContent='Registra la primera visita del mes para ver el estado.';
+    cm.textContent='';
+  }else if(gm<=320){
+    ph.style.borderColor='#1D9E75';cd.style.borderColor='#1D9E75';
+    st.style.color='#085041';st.textContent='Dom está feliz 🐶';
+    ms.textContent='Dentro del plan base — todo bajo control. Margen: '+fmt(mg);
+    cm.style.color='#085041';
+    cm.textContent='Comodines: ~'+Math.floor(mg/40)+'G / ~'+Math.floor(mg/50)+'H disponibles';
+  }else if(gm<=440){
+    ph.style.borderColor='#EF9F27';cd.style.borderColor='#EF9F27';
+    st.style.color='#633806';st.textContent='Dom está alerta 👀';
+    ms.textContent='Usando comodines — quedan '+fmt(mg)+' de margen. ¡Ojo!';
+    cm.style.color='#633806';
+    cm.textContent='~'+Math.max(0,Math.floor(mg/40))+' guarderías más disponibles';
+  }else{
+    ph.style.borderColor='#E24B4A';cd.style.borderColor='#E24B4A';
+    st.style.color='#791F1F';st.textContent='Dom está preocupado 😟';
+    ms.textContent='Excedido en '+fmt(Math.abs(mg))+' — compensar el próximo mes.';
+    cm.style.color='#791F1F';cm.textContent='Sin comodines disponibles';
+  }
+}
+
+// ── TABLA ──────────────────────────────────────────────────────────────
+function renderTabla(){
+  let html='',total=0;
+  MESES.forEach(m=>{
+    const g=gastoMes(m);total+=g;
+    const mg=PRESUP-g,clr=color(g,PRESUP);
+    const est=g===0?'—':g>PRESUP?'🔴 Excedido':g>320?'🟡 Comodines':'🟢 OK';
+    html+=`<tr>
+      <td><b>${m}</b></td>
+      <td style="color:${clr};font-weight:600">${g>0?fmt(g):'—'}</td>
+      <td style="color:#aaa">S/ 440</td>
+      <td style="color:${clr}">${g>0?(g/PRESUP*100).toFixed(1)+'%':'—'}</td>
+      <td style="color:${mg>=0?'#1D9E75':'#E24B4A'}">${g>0?fmt(mg):'—'}</td>
+      <td>${est}</td></tr>`;
+  });
+  document.getElementById('tbody-meses').innerHTML=html;
+  const ca=color(total,PRESUP_A);
+  const ea=total>=PRESUP_A?'🔴 EXCEDIDO':total>PRESUP_A*.9?'🟡 Atención':'🟢 OK';
+  document.getElementById('tot-row').innerHTML=
+    `<td colspan="2"><b>TOTAL 2026</b></td><td>${fmt(total)}</td><td>S/ 5,280</td><td></td><td>${ea}</td>`;
+}
+
+// ── LOG ────────────────────────────────────────────────────────────────
+function renderLog(){
+  const tb=document.getElementById('log-body');
+  if(!visitas.length){
+    tb.innerHTML='<tr><td colspan="5" style="color:#aaa;padding:14px">Sin registros aún</td></tr>';
+    document.getElementById('ultima-vis').textContent='Sin registros aún';
+    return;
+  }
+  const sorted=[...visitas].sort((a,b)=>b.fecha.localeCompare(a.fecha));
+  tb.innerHTML=sorted.map(v=>`<tr>
+    <td>${new Date(v.fecha+'T12:00:00').toLocaleDateString('es-PE')}</td>
+    <td>${v.tipo}</td><td>S/ ${v.precio}</td>
+    <td>${MESES_F[v.mes]||v.mes}</td>
+    <td><button class="btn-del" onclick="borrar('${v.fecha}','${v.tipo}','${v.precio}')">🗑</button></td>
+  </tr>`).join('');
+  const u=sorted[0];
+  document.getElementById('ultima-vis').textContent=
+    'Última visita: '+new Date(u.fecha+'T12:00:00').toLocaleDateString('es-PE')+' · '+u.tipo;
+}
+
+// ── AGREGAR / BORRAR ───────────────────────────────────────────────────
+async function agregarVisita(){
+  const fecha=document.getElementById('inp-fecha').value;
+  const tipo=document.getElementById('inp-tipo').value;
+  const precio=Number(document.getElementById('inp-precio').value);
+  if(!fecha){alert('Selecciona una fecha');return;}
+  const mes=getMes(fecha);
+  const nueva={fecha,tipo,precio,mes};
+  // Optimistic UI
+  visitas.push(nueva);
+  render();
+  toast('⏳ Guardando en la nube...');
+  try {
+    await apiPost({action:'add', fecha, tipo, precio, mes});
+    localStorage.setItem('dom_visitas', JSON.stringify(visitas));
+    toast('✅ Visita guardada — '+tipo+' S/ '+precio);
+  } catch(e) {
+    toast('⚠️ Guardado solo local — sin conexión', 4000);
+    localStorage.setItem('dom_visitas', JSON.stringify(visitas));
+  }
+}
+
+async function borrar(fecha,tipo,precio){
+  const idx=visitas.findIndex(v=>v.fecha===fecha&&v.tipo===tipo&&String(v.precio)===precio);
+  if(idx>-1){
+    visitas.splice(idx,1);
+    render();
+    try {
+      await apiPost({action:'delete', fecha, tipo, precio});
+      localStorage.setItem('dom_visitas', JSON.stringify(visitas));
+      toast('🗑 Registro eliminado');
+    } catch(e) {
+      toast('⚠️ Eliminado solo local — sin conexión', 4000);
+      localStorage.setItem('dom_visitas', JSON.stringify(visitas));
+    }
+  }
+}
+document.getElementById('inp-tipo').addEventListener('change',function(){
+  document.getElementById('inp-precio').value={Guardería:40,Hospedaje:50,Pijamada:25}[this.value]||40;
+});
+document.getElementById('inp-fecha').value=new Date().toISOString().split('T')[0];
+
+// ── SINCRONIZAR ────────────────────────────────────────────────────────
+async function refrescar(){
+  toast('🔄 Actualizando desde la nube...');
+  await cargarDesdeSheets();
+  toast('✅ Datos actualizados');
+}
+
+async function limpiarTodo(){
+  if(!confirm('¿Borrar TODOS los registros de la nube? Esto no se puede deshacer.')) return;
+  try {
+    await apiPost({action:'clear'});
+    visitas=[];
+    localStorage.removeItem('dom_visitas');
+    render();
+    toast('🗑 Todos los registros eliminados');
+  } catch(e) {
+    toast('⚠️ Error al limpiar', 3000);
+  }
+}
+
+// ── RENDER PRINCIPAL ───────────────────────────────────────────────────
+function render(){
+  const mes=mesHoy();
+  const gm=gastoMes(mes),ga=totalA();
+
+  drawGauge('g-mensual',gm,PRESUP);
+  drawGauge('g-anual',ga,PRESUP_A);
+
+  document.getElementById('gm-val').textContent=fmt(gm);
+  document.getElementById('ga-val').textContent='S/ '+ga.toLocaleString('es-PE',{minimumFractionDigits:0,maximumFractionDigits:0});
+  document.getElementById('gauge-mes-title').textContent=(MESES_N[mes]||mes)+' 2026';
+
+  const gmp=(gm/PRESUP*100).toFixed(1),gap=(ga/PRESUP_A*100).toFixed(1);
+  const bm=document.getElementById('gm-badge'),ba=document.getElementById('ga-badge');
+  bm.textContent=gmp+'% · '+(gm>PRESUP?'EXCEDIDO':gm>320?'Comodines':'En control');
+  bm.className='gauge-badge '+(gm>PRESUP?'danger':gm>320?'warn':'ok');
+  ba.textContent=gap+'% · '+(ga>PRESUP_A?'EXCEDIDO':ga>PRESUP_A*.9?'Atención':'OK');
+  ba.className='gauge-badge '+(ga>PRESUP_A?'danger':ga>PRESUP_A*.9?'warn':'ok');
+
+  updateDom(gm);
+  renderTabla();
+  renderLog();
+}
+
+// Cargar desde Google Sheets al iniciar
+cargarDesdeSheets();
+</script>
+</body>
+</html>
